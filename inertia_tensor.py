@@ -9,7 +9,13 @@ from numpy import linalg
 
 
 class InertiaTensor():
-	'''Class for computing the inertia tensor for 2D distributions.
+	"""
+	A class for computing the mass/inertia tensor for 2D distributions.
+
+	...
+
+	Attributes
+	__________
 	locs 	: (N, 2) array of particle/pixel locations	
 	weights : (N, ) array of weights
 	apert 	: Aperture imposed by the user
@@ -18,7 +24,32 @@ class InertiaTensor():
 	n_its 	: Number of iterations undertaken by algorithm
 	As/Bs 	: Axis lengths of morphing ellipse for each iteration
 	angs 	: Orientation of morphing ellipse for each iteration
-	'''
+
+
+	Methods
+	__________
+	DataLoad(locs, weights, apert = None)
+		Loads the input data positions and weights
+
+	Simple(apert = None):
+		Computes the simple inertia tensor
+
+	SimpleIterative(self, apert = None, max_iterations = 100, convergence_sensitvity = 0.01):
+		Computes the iterative form of the simple inertia tensor
+
+	Reduced(apert = None):
+		Computes the reduced inertia tensor
+
+	ReducedIterative(apert = None, max_iterations = 100, convergence_sensitvity = 0.01):
+		Computes the iterative form of the reduced inertia tensor
+
+	ShapeParameters(scale = True, scale_to = None):
+		Computes the shape parameters of an ellipse described by the inertia tensor
+
+	PlotFit():
+		Plots the ellipse described by the inertia tensor over the input particles
+
+	"""
 
 	def __init__(self):
 		self.locs 	 = []
@@ -32,8 +63,22 @@ class InertiaTensor():
 		self.angs		= []
 
 	def DataLoad(self, locs, weights, apert = None):
-		# Loads in projected location data and weights. 
-		# First asserts data arrays are the right size.
+		"""
+		
+		This function loads the data from which the inertia tensor is to be computed.
+
+
+			Parameters:
+					locs 	(float)	: A 2D array of (x, y) particle positions
+					weights (float)	: An array of particle weights
+					apert 	(float) : Optional aperture to be applied in shape computation
+
+			Returns:
+					self.apert		(float)	: A 2D array of (x, y) particle positions in the correct orientation
+					self.locs		(float)	: An array of particle weights in the correct orientation
+					self.weights	(float)	: Optional aperture to be applied in shape computation		
+
+		"""
 		if apert is not None:
 			self.apert = apert
 		loc_shape = np.shape(locs)
@@ -50,6 +95,20 @@ class InertiaTensor():
 			print('New data loaded, sizes %s and %s' % (loc_shape, weights_shape))
 
 	def Simple(self, apert = None):
+		"""
+		
+		This function computes the 'simple' form of the inertia tensor. No iteration.
+
+
+			Parameters:
+					apert 	(float) : Optional aperture to be applied in shape computation
+
+			Returns:
+					self.inertia_tensor	(float)	: The inertia tensor, a 2x2 Matrix
+					self.sub_length		(float)	: The number of particels within the initial aperture
+
+		"""
+
 		# Computes the 'simple' form of the inertia tensor. No iteration.
 		if apert is not None:
 			self.apert = apert
@@ -65,7 +124,24 @@ class InertiaTensor():
 		self.inertia_tensor, self.sub_length = M, sum(aperture)
 
 	def SimpleIterative(self, apert = None, max_iterations = 100, convergence_sensitvity = 0.01):
-		# Computes the 'simple' form of the inertia tensor. Iterative.
+		"""
+		
+		This function computes the 'simple' form of the inertia tensor. Iterative.
+
+
+			Parameters:
+					max_iterations 			(int) : Maximum number of iterations before convergence deemed to have failed
+					convergence_sensitvity 	(int) : Fractional change threshold before deemed converged
+
+			Returns:
+					self.inertia_tensor	(float)	: The inertia tensor, a 2x2 Matrix
+					self.sub_length		(float)	: The number of particels within the initial aperture
+					self.As				(float)	: Minor axis length at each iteration
+					self.Bs				(float)	: Major axis length at each iteration
+					self.angs			(float)	: Angle of ellipse orientation at each iteration
+					self.n_its			(float)	: Number of iterations before convergence
+
+		"""
 
 		def simple(weight, locs, r_sph):
 			dists = np.linalg.norm(self.locs, axis = 1)
@@ -162,7 +238,19 @@ class InertiaTensor():
 		self.n_its = max_it
 
 	def Reduced(self, apert = None):
-		# Computes the 'reduced' form of the inertia tensor. No iteration.
+		"""
+		
+		This function computes the 'reduced' form of the inertia tensor. No iteration.
+
+
+			Parameters:
+					apert 	(float) : Optional aperture to be applied in shape computation
+
+			Returns:
+					self.inertia_tensor	(float)	: The inertia tensor, a 2x2 Matrix
+					self.sub_length		(float)	: The number of particels within the initial aperture
+
+		"""
 		if apert is not None:
 			self.apert = apert
 		R_matrix 	= np.array(self.locs[:,:,np.newaxis] * self.locs[:,np.newaxis,:])
@@ -178,7 +266,24 @@ class InertiaTensor():
 		self.inertia_tensor, self.sub_length = M, sum(corr)
 
 	def ReducedIterative(self, apert = None, max_iterations = 100, convergence_sensitvity = 0.01):
-		# Computes the 'reduced' form of the inertia tensor. Iterative.
+		"""
+		
+		This function computes the 'reduced' form of the inertia tensor. Iterative.
+
+
+			Parameters:
+					max_iterations 			(int) : Maximum number of iterations before convergence deemed to have failed
+					convergence_sensitvity 	(int) : Fractional change threshold before deemed converged
+
+			Returns:
+					self.inertia_tensor	(float)	: The inertia tensor, a 2x2 Matrix
+					self.sub_length		(float)	: The number of particels within the initial aperture
+					self.As				(float)	: Minor axis length at each iteration
+					self.Bs				(float)	: Major axis length at each iteration
+					self.angs			(float)	: Angle of ellipse orientation at each iteration
+					self.n_its			(float)	: Number of iterations before convergence
+
+		"""
 
 		def reduced(weight, locs, r_sph):
 			M = np.ones((2,2))
@@ -216,8 +321,7 @@ class InertiaTensor():
 			bottom  = np.linalg.norm(maj)*np.linalg.norm(line)
 			tot		= top/bottom
 			ang	 	= np.rad2deg( np.arccos(abs(tot))  )
-			ang1	= 90 - ang
-			return ang1
+			return ang
 
 		if apert is not None:
 			self.apert = apert
@@ -277,6 +381,23 @@ class InertiaTensor():
 		self.n_its = max_it
 
 	def ShapeParameters(self, scale = True, scale_to = None):
+		"""
+		
+		This function computes the shape parameters of the ellipse described by the inertia tensor
+
+
+			Parameters:
+					scale 		(bool) 	: Scalse axis lengths to ensure that same area as initial circular aperture
+					scale_to 	(float) : Scale term - if None, scales to initial circular aperture
+
+			Returns:
+					self.a				(float)	: Minor axis length 
+					self.b				(float)	: Major axis length 
+					self.minor_axis		(float)	: Minor axis vector
+					self.major_axis		(float)	: Minor axis vector
+
+		"""
+
 		vals, vecs 	= sp.linalg.eigh(self.inertia_tensor)
 		ab			= np.sqrt(vals)
 		order 		= np.argsort(ab)
@@ -296,6 +417,12 @@ class InertiaTensor():
 		self.major_axis = orientation[1]
 
 	def PlotFit(self):
+		"""
+		
+		This function plots the ellpise described by the inertia tensor in comparison to the input position array
+
+		"""
+
 
 		def orient(tensor):
 			eigs, eigv = sp.linalg.eigh(tensor)
@@ -307,15 +434,14 @@ class InertiaTensor():
 			bottom  = np.linalg.norm(maj)*np.linalg.norm(line)
 			tot		= top/bottom
 			ang	 	= np.rad2deg( np.arccos(abs(tot))  )
-			ang1	= 90 - ang
-			return -1.*ang1
+			return ang
 
 		ang = orient(self.inertia_tensor)
 
 		e1 = Ellipse((0, 0), 2.*self.apert, 2.*self.apert,
 							angle=0, linewidth=2, fill=False, zorder=2, edgecolor = 'k')
 
-		e2 = Ellipse((0, 0), 2.*self.a, 2.*self.b,
+		e2 = Ellipse((0, 0), 2.*self.b, 2.*self.a,
 							angle=ang, linewidth=2, fill=False, zorder=2, edgecolor = 'orange')
 
 		custom_lines = [Line2D([0], [0], color= 'k', ls = '-', lw=2),
