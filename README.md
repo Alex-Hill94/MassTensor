@@ -2,8 +2,6 @@
 
 MassTensor is a python package used to compute the mass distribution tensor for a 2-dimensional distribution of points, particles or pixels.
 
-
-
 Script to compute the 2-dimensional mass distribution tensor.
 
 Casper is a python package aimed at predicting the concentration and shape parameter of dark matter haloes as a function of mass and redshift for a specified cosmology.
@@ -19,7 +17,11 @@ MassTensor requires:
 
 ## Install
 
+To use this package, please clone this github repository as:
 
+`git clone https://github.com/Alex-Hill94/MassTensor.git`
+
+and add the folder to your python path. 
 
 ## Use
 
