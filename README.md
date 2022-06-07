@@ -4,8 +4,6 @@ MassTensor is a python package used to compute the mass distribution tensor for 
 
 Script to compute the 2-dimensional mass distribution tensor.
 
-Casper is a python package aimed at predicting the concentration and shape parameter of dark matter haloes as a function of mass and redshift for a specified cosmology.
-
 ## Requirements
 
 MassTensor requires:
